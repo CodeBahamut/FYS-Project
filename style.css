@@ -1,0 +1,29 @@
+h1 {
+    border: 2px solid red;
+    border-radius: 8px;
+}
+
+#btnvooruit {
+    background-color: white;
+    border: black solid 1px;
+    padding: 20px 20px;
+    position:absolute; left:100px; top:70px;
+}
+#btnlinks {
+    background-color: white;
+    border: black solid 1px;
+    padding: 20px 20px;
+    position:absolute; left:10px; top:135px;
+}
+#btnrechts {
+    background-color: white;
+    border: black solid 1px;
+    padding: 20px 20px;
+    position:absolute; left:199px; top:135px;
+}
+#btnachteruit {
+    background-color: white;
+    border: black solid 1px;
+    padding: 20px 20px;
+    position:absolute; left:93px; top:200px;
+}
