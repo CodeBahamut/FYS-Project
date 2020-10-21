@@ -44,5 +44,10 @@ def statuslnk():
     #De html pagina waarin de geupdate status staat
     return render_template("statuslnk.html")
 
+@app.route("/stop")
+def stop():
+    #Redirect je naar de index.html omdat de robot moet stoppen
+    return redirect("/")    
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
