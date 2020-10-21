@@ -27,3 +27,9 @@ h1 {
     padding: 20px 20px;
     position:absolute; left:93px; top:200px;
 }
+#btnstop {
+    background-color: white;
+    border: black solid 1px;
+    padding: 15px 15px;
+    position: absolute; left:111px; top:140px;
+}
