@@ -1,53 +1,63 @@
 import RPi.GPIO as GPIO
 from flask import Flask, render_template, redirect
-import time
+from time import sleep
+from gpiozero import Motor
 
 app = Flask(__name__)
 
+motor1 = Motor(forward=(7), backward=(8))
+motor2 = Motor(forward=(9), backward=(10))
+
 @app.route("/")
 def index():
-    #Hierin kan je de setups van de GPIO pinnen zetten
     return render_template('index.html')
 
 @app.route("/Vooruit")
 def vooruit():
-    #Hierin komt dus de GPIO, HIGH voor wanneer de knop 'vooruit' wordt ingedrukt
+    motor1.forward()
+    motor2.forward()
     return redirect("/StatusVooruit")
 
 @app.route("/Achteruit")
 def achteruit():
-    #Hierin komt de GPIO, HIGH voor wanneer de knop 'achteruit' wordt ingedrukt
+    motor1.backward()
+    motor2.backward()
     return redirect("/StatusAchteruit")
 
 @app.route("/Links")
 def links():
-    #Hierin komt de GPIO, HIGH voor wanneer de knop 'links' wordt ingedrukt
+    motor1.forward()
+    motor2.backward()
     return redirect("/StatusLinks")
 
 @app.route("/Rechts")
 def rechts():
-    #Hierin komt de GPIO, HIGH voor wanneer de knop 'rechts' wordt ingedrukt
-    return redirect("/")
+    motor1.backward()
+    motor2.forward()
+    return redirect("/StatusRechts")
+
+@app.route("/stop")
+def stop():
+    motor1.stop()
+    motor2.stop()
+     return redirect("/")
 
 @app.route("/StatusVooruit")
 def statusvrt():
-    #De html pagina waarin de geupdate status staat
     return render_template("statusvrt.html")
 
 @app.route("/StatusAchteruit")
 def statusact():
-    #De html pagina waarin de geupdate status staat
     return render_template("statusact.html")
 
 @app.route("/StatusLinks")
 def statuslnk():
-    #De html pagina waarin de geupdate status staat
     return render_template("statuslnk.html")
 
-@app.route("/stop")
-def stop():
-    #Redirect je naar de index.html omdat de robot moet stoppen
-    return redirect("/")    
+@app.route("/StatusRechts")
+def statusrct():
+    return render_template("statusrct.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
