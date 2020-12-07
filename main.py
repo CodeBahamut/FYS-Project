@@ -1,5 +1,4 @@
 from flask import Flask, render_template, redirect
-from time import sleep
 from gpiozero import Motor
 from pyPS4Controller.controller import Controller # sudo pip install pyPS4Controller
 import socket
@@ -8,9 +7,6 @@ app = Flask(__name__)
 
 motor1 = Motor(forward=(7), backward=(8))
 motor2 = Motor(forward=(9), backward=(10))
-
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-controller.listen(timeout=60) # https://pes.mundayweb.com/html/Using%20PS4%20Control%20Pads%20via%20Bluetooth.html#pairing-using-bluetoothctl
 
 @app.route("/")
 def index():
@@ -44,34 +40,13 @@ class MyController(Controller):
         motor1.stop()
 
 
-
-def forward():
-    motor1.forward()
-    motor2.forward()
+controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+controller.listen(timeout=60) # https://pes.mundayweb.com/html/Using%20PS4%20Control%20Pads%20via%20Bluetooth.html#pairing-using-bluetoothctl
 
 
-def backward():
-    motor1.backward()
-    motor2.backward()
-
-
-def left():
-    motor1.forward()
-    motor2.backward()
-
-
-def right():
-    motor1.backward()
-    motor2.forward()
-
-
-def stop():
-    motor1.stop()
-    motor2.stop()
-
-def rfid_response(serverMACAddress, port, value):
+def rfid_response(server_mac_address, port, value):
     s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.connect((serverMACAddress, port))
+    s.connect((server_mac_address, port))
     s.send(bytes(value, 'UTF-8'))
     s.close()
 
