@@ -4,7 +4,7 @@ A simple Python script to send messages with bluethooth.
 
 import socket
 
-hostMACAddress = 'DC:A6:32:35:20:0F' # De MAC address van de Bluetooth adapter op de server. (Dus de pie die de data ontvangt. Het kan ook b$
+hostMACAddress = 'DC:A6:32:BC:EB:49' # De MAC address van de Bluetooth adapter op de server. (Dus de pie die de data ontvangt. Het kan ook b$
 port = 3 # 3 is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
 backlog = 1
 size = 1024
