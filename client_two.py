@@ -31,6 +31,10 @@ while id != 914171570937 and id != 848246612969:
 
         if id == 914171570937:
                 GPIO.output(12, GPIO.LOW)
+                serverMACAddress = 'DC:A6:32:35:20:0F' #addres van de ontvannger pi
+                port = 3
+                s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+                s.connect((serverMACAddress,port))
                 goed = 1
                 sendg = str(goed)
                 s.send(bytes(sendg, 'UTF-8'))
@@ -53,6 +57,10 @@ while id != 914171570937 and id != 848246612969:
                         time.sleep(0.1)
 
                         if elapsed_time > seconds:
+                                serverMACAddress = 'DC:A6:32:35:20:0F' #addres van de ontvannger pi
+                                port = 3
+                                s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+                                s.connect((serverMACAddress,port))
                                 fout = 0
                                 sendf = str(fout)
                                 s.send(bytes(sendf, 'UTF-8'))
