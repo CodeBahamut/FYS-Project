@@ -4,16 +4,13 @@ A simple Python script to send messages with bluethooth.
 
 import socket
 
-serverMACAddress = '00:1f:e1:dd:08:3d' #addres van de ontvannger pi
-port = 3
+hostMACAddress = 'DC:A6:32:35:20:0F' # De MAC address van de Bluetooth adapter op de server. (Dus de pie die de data ontvangt. Het kan ook b$
+port = 3 # 3 is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
+backlog = 1
+size = 1024
 s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-s.connect((serverMACAddress,port))
-while 1:
-    text = input() #de text of whatever je wilt versturen
-    if text == "quit":
-        break
-    s.send(bytes(text, 'UTF-8'))
-s.close()
+s.bind((hostMACAddress,port))
+s.listen(backlog)
 
 while id != 914171570937 and id != 848246612969:
 
@@ -34,8 +31,11 @@ while id != 914171570937 and id != 848246612969:
 
         if id == 914171570937:
                 GPIO.output(12, GPIO.LOW)
-                score = score +1
-                print(score)
+                goed = 1
+                sendg = str(goed)
+                s.send(bytes(sendg, 'UTF-8'))
+                s.close()s.send(bytes(send1, 'UTF-8'))
+                s.close()
 
 
         elif id == 848246612969:
@@ -53,6 +53,11 @@ while id != 914171570937 and id != 848246612969:
                         time.sleep(0.1)
 
                         if elapsed_time > seconds:
+                                fout = 0
+                                sendf = str(fout)
+                                s.send(bytes(sendf, 'UTF-8'))
+                                s.close()s.send(bytes(send1, 'UTF-8'))
+                                s.close()
                                 break
 
         else:
@@ -71,11 +76,7 @@ while id != 914171570937 and id != 848246612969:
                         GPIO.output(12, GPIO.LOW)
                         time.sleep(0.1)
 
-                        if elapsed_time > seconds:
+                        if elapsed_time > seconds:      
                                 break
 
 GPIO.cleanup()
-send1 = str(score)
-print(send1)
-s.send(bytes(send1, 'UTF-8'))
-s.close()
