@@ -31,7 +31,7 @@ while id != 914171570937 and id != 848246612969:
 
         if id == 914171570937:
                 GPIO.output(12, GPIO.LOW)
-                serverMACAddress = 'DC:A6:32:35:20:0F' #addres van de ontvannger pi
+                serverMACAddress = 'DC:A6:32:32:BF:4B' #addres van de ontvannger pi
                 port = 3
                 s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
                 s.connect((serverMACAddress,port))
@@ -57,7 +57,7 @@ while id != 914171570937 and id != 848246612969:
                         time.sleep(0.1)
 
                         if elapsed_time > seconds:
-                                serverMACAddress = 'DC:A6:32:35:20:0F' #addres van de ontvannger pi
+                                serverMACAddress = 'DC:A6:32:32:BF:4B' #addres van de ontvannger pi
                                 port = 3
                                 s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
                                 s.connect((serverMACAddress,port))
