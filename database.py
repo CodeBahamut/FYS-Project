@@ -15,4 +15,11 @@ def main():
 
     database.commit()
 
+    cursor.execute("SELECT`name`, `score` FROM`Fys`")
+
+    result = cursor.fetchall()
+
+    for row in result:
+        print("Name player: " + row[0] + ", Score: " + str (row[1]))
+
 if __name__== "__main__":main()
