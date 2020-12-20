@@ -1,8 +1,8 @@
 from flask import Flask, render_template
 from gpiozero import Motor
-import bluetooth
 from sh import sudo
 from pyPS4Controller.controller import Controller
+import bluetooth
 import socket
 
 app = Flask(__name__)
@@ -12,6 +12,8 @@ motor1 = Motor(forward=8, backward=7)
 motor2 = Motor(forward=10, backward=9)
 
 controller_mac = "DC:0C:2D:72:E6:EE"
+size = 1024
+backlog = 1
 
 
 @app.route("/")
@@ -74,17 +76,34 @@ class MyController(Controller):
         motor1.stop()
 
 
-find_controller()
-
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-controller.listen()
-
-
-def rfid_response(server_mac_address, port, value):
+def rfid_send_msg(server_mac_address, port, value):
     s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     s.connect((server_mac_address, port))
     s.send(bytes(value, 'UTF-8'))
     s.close()
+
+
+#Port is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
+def rfid_receive_msg(hostMACAddress, port):
+    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    s.bind((hostMACAddress, port))
+    s.listen(backlog)
+    try:
+        client, address = s.accept()
+        while 1:
+            data = client.recv(size)
+            if data:
+                print(
+                    data)  # Whatever je gestuurd hebt word geprint in console je kan dus ook hiermee een pin aan sturen met een if etc.
+                client.send(data)
+    except:
+        print("Closing socket")
+        client.close()
+        s.close()
+
+
+def game_start():
+    NotImplemented
 
 
 @app.route('/json')
@@ -99,3 +118,10 @@ def background_process_test():
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
+
+
+find_controller()
+
+controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+game_start()
+controller.listen()
