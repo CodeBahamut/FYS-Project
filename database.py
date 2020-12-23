@@ -18,7 +18,7 @@ def main():
 # hiermee laat je zien wat je wilt hebben uit je database
     cursor.execute("SELECT`name`, `score` FROM`Fys`")
 
-# hiermee pak je alles uit naam en score 
+# hiermee pak je alles uit naam en score
     result = cursor.fetchall()
 
     for row in result:
