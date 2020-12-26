@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, request, redirect, url_for, render_template
 from gpiozero import Motor
 import bluetooth
 from sh import sudo
@@ -32,6 +32,14 @@ def background_process_test():
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
 
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        user = request.form["nm"]
+        return user
+    else:
+        return render_template("index.html")
+
 database = mysql.connector.connect(
     host="oege.ie.hva.nl",
     user="keladab",
@@ -43,7 +51,7 @@ def database():
 # hier laat je met cursor.execute zien wat je in je database wilt zetten en welke values het heeft
     cursor = database.cursor()
     cursor.execute("INSERT INTO`Fys` (`name`, `score`) "
-               "VALUES('bart', '5' );")
+               "VALUES( user , '5' );")
 
     database.commit()
 
