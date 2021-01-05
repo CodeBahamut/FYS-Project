@@ -112,6 +112,7 @@ class MyController(Controller):
         print(turn_value)
         motor1.backward(turn_value)
 
+
     def on_L3_left(self, value):
         turn_value = 1 - ((32767 + value) / 32767)
         print(turn_value)
@@ -119,6 +120,10 @@ class MyController(Controller):
 
     def on_L3_x_at_rest(self):
         motor1.stop()
+
+    def disconnect(self):
+        motor1.stop()
+        motor2.stop()
 
 
 def rfid_send_msg(server_mac_address, port, value):
