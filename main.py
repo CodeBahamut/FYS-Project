@@ -1,9 +1,10 @@
-from flask import Flask, render_template
+from flask import Flask, request, redirect, url_for, render_template
 from gpiozero import Motor
 from sh import sudo
 from pyPS4Controller.controller import Controller
 import bluetooth
 import socket
+import mysql.connector
 
 app = Flask(__name__)
 
@@ -20,6 +21,50 @@ backlog = 1
 def index():
     return render_template('index.html')
 
+@app.route('/json')
+def json():
+    return render_template('json.html')
+
+
+@app.route('/background_process_test')
+def background_process_test():
+    return "nothing"
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0')
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        user = request.form["nm"]
+        return user
+    else:
+        return render_template("index.html")
+
+database = mysql.connector.connect(
+    host="oege.ie.hva.nl",
+    user="keladab",
+    password="ariUD31oXoqVdy",
+    database="zkeladab"
+)
+def database():
+
+# hier laat je met cursor.execute zien wat je in je database wilt zetten en welke values het heeft
+    cursor = database.cursor()
+    cursor.execute("INSERT INTO`Fys` (`name`, `score`) "
+               "VALUES( user , '5' );")
+
+    database.commit()
+
+# hiermee laat je zien wat je wilt hebben uit je database
+    cursor.execute("SELECT`name`, `score` FROM`Fys`")
+
+# hiermee pak je alles uit naam en score
+    result = cursor.fetchall()
+
+    for row in result:
+        print("Name player: " + row[0] + ", Score: " + str (row[1]))
 
 def find_controller():
     loop = True
@@ -83,45 +128,4 @@ def rfid_send_msg(server_mac_address, port, value):
     s.close()
 
 
-#Port is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
-def rfid_receive_msg(hostMACAddress, port):
-    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.bind((hostMACAddress, port))
-    s.listen(backlog)
-    try:
-        client, address = s.accept()
-        while 1:
-            data = client.recv(size)
-            if data:
-                print(
-                    data)  # Whatever je gestuurd hebt word geprint in console je kan dus ook hiermee een pin aan sturen met een if etc.
-                client.send(data)
-    except:
-        print("Closing socket")
-        client.close()
-        s.close()
 
-
-def game_start():
-    NotImplemented
-
-
-@app.route('/json')
-def json():
-    return render_template('json.html')
-
-
-@app.route('/background_process_test')
-def background_process_test():
-    return "nothing"
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
-
-
-find_controller()
-
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-game_start()
-controller.listen()
