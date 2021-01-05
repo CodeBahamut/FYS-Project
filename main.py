@@ -1,8 +1,8 @@
 from flask import Flask, request, redirect, url_for, render_template
 from gpiozero import Motor
-import bluetooth
 from sh import sudo
 from pyPS4Controller.controller import Controller
+import bluetooth
 import socket
 import mysql.connector
 
@@ -13,6 +13,8 @@ motor1 = Motor(forward=8, backward=7)
 motor2 = Motor(forward=10, backward=9)
 
 controller_mac = "DC:0C:2D:72:E6:EE"
+size = 1024
+backlog = 1
 
 
 @app.route("/")
@@ -119,13 +121,7 @@ class MyController(Controller):
         motor1.stop()
 
 
-find_controller()
-
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-controller.listen()
-
-
-def rfid_response(server_mac_address, port, value):
+def rfid_send_msg(server_mac_address, port, value):
     s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     s.connect((server_mac_address, port))
     s.send(bytes(value, 'UTF-8'))

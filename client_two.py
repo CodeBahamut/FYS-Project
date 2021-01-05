@@ -38,7 +38,6 @@ while id != 914171570937 and id != 848246612969:
                 goed = 1
                 sendg = str(goed)
                 s.send(bytes(sendg, 'UTF-8'))
-                s.close()s.send(bytes(send1, 'UTF-8'))
                 s.close()
 
 
@@ -64,7 +63,6 @@ while id != 914171570937 and id != 848246612969:
                                 fout = 0
                                 sendf = str(fout)
                                 s.send(bytes(sendf, 'UTF-8'))
-                                s.close()s.send(bytes(send1, 'UTF-8'))
                                 s.close()
                                 break
 
