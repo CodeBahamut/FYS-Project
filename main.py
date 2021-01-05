@@ -5,6 +5,8 @@ from pyPS4Controller.controller import Controller
 import bluetooth
 import socket
 import mysql.connector
+import config
+import time
 
 app = Flask(__name__)
 
@@ -34,6 +36,7 @@ def background_process_test():
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
 
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
@@ -42,12 +45,15 @@ def login():
     else:
         return render_template("index.html")
 
+
 database = mysql.connector.connect(
     host="oege.ie.hva.nl",
     user="keladab",
     password="ariUD31oXoqVdy",
-    database="zkeladab"
+    database="zkeladab",
+    auth_plugin='mysql_native_password'
 )
+
 def database():
 
 # hier laat je met cursor.execute zien wat je in je database wilt zetten en welke values het heeft
@@ -109,16 +115,27 @@ class MyController(Controller):
 
     def on_L3_right(self, value):
         turn_value = value / 32767
+        config.turn_speed = turn_value
+        config.direction = "right"
         print(turn_value)
         motor1.backward(turn_value)
 
-
     def on_L3_left(self, value):
         turn_value = 1 - ((32767 + value) / 32767)
+        config.turn_speed = turn_value
+        config.direction = "left"
         print(turn_value)
         motor1.forward(turn_value)
 
     def on_L3_x_at_rest(self):
+        if config.direction == "right":
+            motor1.forward(config.turn_speed)
+            time.sleep(0.2)
+
+        if config.direction == "left":
+            motor1.backward(config.turn_speed)
+            time.sleep(0.2)
+
         motor1.stop()
 
     def disconnect(self):
@@ -132,5 +149,33 @@ def rfid_send_msg(server_mac_address, port, value):
     s.send(bytes(value, 'UTF-8'))
     s.close()
 
+#Port is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
+def rfid_receive_msg(hostMACAddress, port):
+    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    s.bind((hostMACAddress, port))
+    s.listen(backlog)
+    try:
+        client, address = s.accept()
+        while 1:
+            data = client.recv(size)
+            if data:
+                print(
+                    data)  # Whatever je gestuurd hebt word geprint in console je kan dus ook hiermee een pin aan sturen met een if etc.
+                client.send(data)
+    except:
+        print("Closing socket")
+        client.close()
+        s.close()
+
+
+def game_start():
+    NotImplemented
+
+
+find_controller()
+
+controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+game_start()
+controller.listen()
 
 
