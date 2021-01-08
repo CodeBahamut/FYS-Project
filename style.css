@@ -1,35 +1,65 @@
-h1 {
-    border: 2px solid red;
-    border-radius: 8px;
+body{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: white;
+    text-align: center;
 }
 
-#btnvooruit {
-    background-color: white;
-    border: black solid 1px;
-    padding: 20px 20px;
-    position:absolute; left:100px; top:70px;
+.box {
+    width: 300px;
+    padding: 40px;
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: #191919;
+    text-align: center;
+    border-radius: 25px;
 }
-#btnlinks {
-    background-color: white;
-    border: black solid 1px;
-    padding: 20px 20px;
-    position:absolute; left:10px; top:135px;
+
+.box h1 {
+    color: white;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: center;
 }
-#btnrechts {
-    background-color: white;
-    border: black solid 1px;
-    padding: 20px 20px;
-    position:absolute; left:199px; top:135px;
+
+.box input[type="text"] {
+    background: none;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    border: 2px solid #3498db;
+    padding: 14px 10px;
+    width: 200px;
+    outline: none;
+    color: white;
+    border-radius: 24px;
+    transition: 0.25s;
+
 }
-#btnachteruit {
-    background-color: white;
-    border: black solid 1px;
-    padding: 20px 20px;
-    position:absolute; left:93px; top:200px;
+
+.box input[type="submit"] {
+    border:2px solid #2ecc71;
+    background: none;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 40px;
+    outline: none;
+    color: white;
+    border-radius: 24px;
+    transition: 0.25s;
+    cursor: pointer;
 }
-#btnstop {
-    background-color: white;
-    border: black solid 1px;
-    padding: 15px 15px;
-    position: absolute; left:111px; top:140px;
+
+.box input[name="nm"]:focus {
+    width: 280px;
+    border-color: #2ecc71;
 }
+
+.box input[type="submit"]:hover {
+    background: #2ecc71;
+}
+
