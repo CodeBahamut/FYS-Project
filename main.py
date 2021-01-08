@@ -1,180 +1,74 @@
-from flask import Flask, request, redirect, url_for, render_template
-from gpiozero import Motor
-from sh import sudo
-from pyPS4Controller.controller import Controller
-import bluetooth
-import socket
-import mysql.connector
+from flask import Flask, render_template, redirect, url_for, request, session, flash
+from datetime import timedelta
 import config
+import functions
+import control_management
 import time
 
 app = Flask(__name__)
 
 
-motor1 = Motor(forward=8, backward=7)
-motor2 = Motor(forward=10, backward=9)
-
-controller_mac = "DC:0C:2D:72:E6:EE"
-size = 1024
-backlog = 1
+app.secret_key = "TeamTechnoManTeam"
+app.permanent_session_lifetime = timedelta(seconds=5)
 
 
 @app.route("/")
 def index():
-    return render_template('index.html')
-
-@app.route('/json')
-def json():
-    return render_template('json.html')
+    return redirect('login')
 
 
-@app.route('/background_process_test')
-def background_process_test():
-    return "nothing"
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        session.permanent = True
+        user = request.form["nm"]
+        session["user"] = user
+        return redirect(url_for("user"))
+    else:
+        if "user" in session:
+            return redirect(url_for("user"))
+        return render_template("login.html")
+
+
+@app.route("/user")
+def user():
+    if "user" in session:
+        user = session["user"]
+        return render_template("user.html", user=user)
+    else:
+        flash("Uw tijd is afgelopen!")
+        return redirect(url_for('login'))
+
+
+@app.route("/score")
+def score():
+    return render_template("score.html")
+
+
+@app.route("/test")
+def test():
+    return render_template("index.html")
+
+
+@app.route("/logout")
+def logout():
+    flash("Uw tijd is afgelopen!")
+    session.pop("user", None)
+    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
 
 
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        user = request.form["nm"]
-        return user
-    else:
-        return render_template("index.html")
-
-
-database = mysql.connector.connect(
-    host="oege.ie.hva.nl",
-    user="keladab",
-    password="ariUD31oXoqVdy",
-    database="zkeladab",
-    auth_plugin='mysql_native_password'
-)
-
-def database():
-
-# hier laat je met cursor.execute zien wat je in je database wilt zetten en welke values het heeft
-    cursor = database.cursor()
-    cursor.execute("INSERT INTO`Fys` (`name`, `score`) "
-               "VALUES( user , '5' );")
-
-    database.commit()
-
-# hiermee laat je zien wat je wilt hebben uit je database
-    cursor.execute("SELECT`name`, `score` FROM`Fys`")
-
-# hiermee pak je alles uit naam en score
-    result = cursor.fetchall()
-
-    for row in result:
-        print("Name player: " + row[0] + ", Score: " + str (row[1]))
-
-def find_controller():
-    loop = True
-    while loop:
-        result = bluetooth.lookup_name(controller_mac, timeout=20)
-        if result is None:
-            print("not detected")
-        else:
-            print("Controller found")
-            try:
-                sudo.bluetoothctl("trust", controller_mac)
-                sudo.bluetoothctl("connect", controller_mac)
-            except:
-                print("Couldn't connect to controller")
-            finally:
-                break
-
-
-class MyController(Controller):
-
-    def __init__(self, **kwargs):
-        Controller.__init__(self, **kwargs)
-
-    def on_R2_press(self, value):
-        speed_value = (32767 + value) / 65534
-        print(speed_value)
-        motor2.forward(speed_value)
-
-    def on_R2_release(self):
-        motor2.stop()
-
-    def on_L2_press(self, value):
-        speed_value = (32767 + value) / 65534
-        print("on_L2_press: {}".format(speed_value))
-        motor2.backward(speed_value)
-
-    def on_L2_release(self):
-        motor2.stop()
-
-    def on_square_press(self):
-        motor2.stop()
-
-    def on_L3_right(self, value):
-        turn_value = value / 32767
-        config.turn_speed = turn_value
-        config.direction = "right"
-        print(turn_value)
-        motor1.backward(turn_value)
-
-    def on_L3_left(self, value):
-        turn_value = 1 - ((32767 + value) / 32767)
-        config.turn_speed = turn_value
-        config.direction = "left"
-        print(turn_value)
-        motor1.forward(turn_value)
-
-    def on_L3_x_at_rest(self):
-        if config.direction == "right":
-            motor1.forward(config.turn_speed)
-            time.sleep(0.2)
-
-        if config.direction == "left":
-            motor1.backward(config.turn_speed)
-            time.sleep(0.2)
-
-        motor1.stop()
-
-    def disconnect(self):
-        motor1.stop()
-        motor2.stop()
-
-
-def rfid_send_msg(server_mac_address, port, value):
-    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.connect((server_mac_address, port))
-    s.send(bytes(value, 'UTF-8'))
-    s.close()
-
-#Port is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
-def rfid_receive_msg(hostMACAddress, port):
-    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.bind((hostMACAddress, port))
-    s.listen(backlog)
-    try:
-        client, address = s.accept()
-        while 1:
-            data = client.recv(size)
-            if data:
-                print(
-                    data)  # Whatever je gestuurd hebt word geprint in console je kan dus ook hiermee een pin aan sturen met een if etc.
-                client.send(data)
-    except:
-        print("Closing socket")
-        client.close()
-        s.close()
-
 
 def game_start():
     NotImplemented
 
 
-find_controller()
+functions.find_controller()
 
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+controller = control_management.MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
 game_start()
 controller.listen()
 
