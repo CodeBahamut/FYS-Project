@@ -6,6 +6,8 @@ score = 0
 start_time = time.time()
 seconds = 300
 
+#Listen
+
 while True:
     serverMACAddress = 'DC:A6:32:BC:EB:49'  # addres van de ontvannger pi
     port = 3

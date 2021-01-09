@@ -13,12 +13,14 @@ client_two_port = 5
 rfid_card_one = 914171570937
 rfid_card_two = 848246612969
 
-turn_speed = int()
-direction = str()
-
 db_config = {
     "host": "oege.ie.hva.nl",
     "user": "keladab",
     "password": "ariUD31oXoqVdy",
     "database": "zkeladab"
 }
+
+game_time_length_sec = 300
+
+turn_speed = float()
+direction = str()
