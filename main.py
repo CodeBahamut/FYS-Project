@@ -3,31 +3,42 @@ from datetime import timedelta
 import config
 import functions
 import control_management
-import threading
+import multiprocessing
 
 app = Flask(__name__)
-
 
 app.secret_key = "TeamTechnoManTeam"
 app.permanent_session_lifetime = timedelta(seconds=5)
 
 
-def game_start(user):
+def game_start(username):
+    config.controls_inactive = False
+    score = 0
+
     control_management.find_controller()
     controller = control_management.MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-    controller_thread = threading.Thread(target=controller.listen(), name="Listen_to_controller", args="")
-    controller_thread.start()
+    controller_process = multiprocessing.Process(target=controller.listen(), name="Listen_to_controller")
+    distance_check_process = \
+        multiprocessing.Process(target=control_management.check_distance(), name="Check_car_distance")
 
-    functions.blue_send_msg(config.client_one_mac, config.client_one_port, "t")
-    functions.blue_send_msg(config.client_two_mac, config.client_two_port, "f")
+    controller_process.start()
+    distance_check_process.start()
 
     time_limit_reached = functions.countdown(config.game_time_length_sec)
 
-
     while True:
         if time_limit_reached:
-            controller.stop
+            config.controls_inactive = True
+            functions.save_data(username, score)
             break
+
+        functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_inactive)
+        functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_active)
+
+
+
+        functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_active)
+        functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_inactive)
 
 
 @app.route("/")
@@ -52,10 +63,10 @@ def login():
 def user():
     if "user" in session:
         user = session["user"]
-        game_thread = threading.Thread(target=game_start(user), name="game", args="")
+        game_process = multiprocessing.Process(target=game_start(user), name="game")
 
-        if not game_thread.is_alive():
-            game_thread.start()
+        if not game_process.is_alive():
+            game_process.start()
 
         return render_template("user.html", user=user)
     else:

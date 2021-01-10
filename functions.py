@@ -4,7 +4,7 @@ import socket
 import mysql.connector as connector
 
 '''
-A  Python script to send messages with bluethooth.
+A  Python script to send and receive messages with bluethooth.
 
 -IMPORTANT-
 Port can be any number between 1 - 30 you want,
@@ -77,7 +77,7 @@ def get_scores():
 
 
 '''
-Game time
+Game time function
 '''
 
 

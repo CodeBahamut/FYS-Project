@@ -1,4 +1,4 @@
-from gpiozero import Motor
+from gpiozero import Motor, DistanceSensor
 from sh import sudo
 from pyPS4Controller.controller import Controller
 import bluetooth
@@ -8,6 +8,18 @@ import time
 
 motor1 = Motor(forward=8, backward=7)
 motor2 = Motor(forward=10, backward=9)
+sensor = DistanceSensor(echo=29, trigger=28)
+
+
+def check_distance():
+
+    while True:
+        distance = sensor.distance * 100
+        print('Distance: ', distance)
+        if distance > 5:
+            config.controls_inactive = True
+            break
+        time.sleep(1)
 
 
 def find_controller():
@@ -31,6 +43,8 @@ class MyController(Controller):
 
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
+        if config.controls_inactive:
+            self.stop()
 
     def on_R2_press(self, value):
         speed_value = (32767 + value) / 65534
