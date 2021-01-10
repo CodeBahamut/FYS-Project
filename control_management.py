@@ -17,7 +17,7 @@ def check_distance():
         distance = sensor.distance * 100
         print('Distance: ', distance)
         if distance > 5:
-            config.controls_inactive = True
+            config.game_stop = True
             break
         time.sleep(1)
 
@@ -43,7 +43,7 @@ class MyController(Controller):
 
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
-        if config.controls_inactive:
+        if config.game_stop:
             self.stop()
 
     def on_R2_press(self, value):

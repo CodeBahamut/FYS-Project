@@ -20,15 +20,14 @@ def game_start(username):
     controller_process = multiprocessing.Process(target=controller.listen(), name="Listen_to_controller")
     distance_check_process = \
         multiprocessing.Process(target=control_management.check_distance(), name="Check_car_distance")
+    time_limit_reached_process = multiprocessing.Process(target=functions.countdown(config.game_time_length_sec))
 
     controller_process.start()
+    time_limit_reached_process.start()
     distance_check_process.start()
 
-    time_limit_reached = functions.countdown(config.game_time_length_sec)
-
     while True:
-        if time_limit_reached:
-            config.controls_inactive = True
+        if config.game_stop:
             functions.save_data(username, score)
             break
 

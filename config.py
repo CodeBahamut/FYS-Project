@@ -27,8 +27,9 @@ db_config = {
 }
 
 game_time_length_sec = 300
+game_stop = False
 
 turn_speed = float()
 direction = str()
-controls_inactive = bool()
+
 
