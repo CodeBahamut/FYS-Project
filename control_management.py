@@ -13,7 +13,6 @@ servo = Servo(26)
 
 
 def check_distance():
-
     while True:
         distance = sensor.distance * 100
         print('Distance: ', distance)
@@ -49,7 +48,6 @@ class MyController(Controller):
 
     def on_R2_press(self, value):
         speed_value = (32767 + value) / 65534
-        print(speed_value)
         motor2.forward(speed_value)
 
     def on_R2_release(self):

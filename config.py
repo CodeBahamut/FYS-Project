@@ -19,14 +19,14 @@ score_no_point = 0
 is_active = 3
 is_inactive = 4
 
-db_config = {
-    "host": "oege.ie.hva.nl",
-    "user": "keladab",
-    "password": "ariUD31oXoqVdy",
-    "database": "zkeladab"
-}
 
-game_time_length_sec = 300
+db_host = "oege.ie.hva.nl"
+db_user = "keladab"
+db_password = "ariUD31oXoqVdy"
+db_database = "zkeladab"
+
+
+game_time_length_sec = 10
 game_stop = False
 
 turn_speed = float()
