@@ -46,7 +46,6 @@ Database related functions
 
 def connect_db():
     db = config.db_config
-
     try:
         c = connector.connect(**db)
         print("Connected!")
@@ -64,15 +63,16 @@ def save_data(name, score):
     cursor.execute(sql, val)
     db.commit()
     save_data()
+    db.close()
 
 
 def get_scores():
     db = connect_db()
     cursor = db.cursor()
-    cursor.execute("SELECT`name`, `score` FROM`Fys`")
+    cursor.execute("SELECT * FROM `Fys`")
 
     result = cursor.fetchall()
-
+    db.close()
     return result
 
 

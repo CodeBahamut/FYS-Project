@@ -1,4 +1,4 @@
-from gpiozero import Motor, DistanceSensor
+from gpiozero import Motor, DistanceSensor, Servo
 from sh import sudo
 from pyPS4Controller.controller import Controller
 import bluetooth
@@ -8,7 +8,8 @@ import time
 
 motor1 = Motor(forward=8, backward=7)
 motor2 = Motor(forward=10, backward=9)
-sensor = DistanceSensor(echo=29, trigger=28)
+sensor = DistanceSensor(echo=21, trigger=20)
+servo = Servo(26)
 
 
 def check_distance():
@@ -56,7 +57,6 @@ class MyController(Controller):
 
     def on_L2_press(self, value):
         speed_value = (32767 + value) / 65534
-        print("on_L2_press: {}".format(speed_value))
         motor2.backward(speed_value)
 
     def on_L2_release(self):
@@ -69,27 +69,32 @@ class MyController(Controller):
         turn_value = value / 32767
         config.turn_speed = turn_value
         config.direction = "right"
-        print(turn_value)
         motor1.backward(turn_value)
 
     def on_L3_left(self, value):
         turn_value = 1 - ((32767 + value) / 32767)
         config.turn_speed = turn_value
         config.direction = "left"
-        print(turn_value)
         motor1.forward(turn_value)
 
     def on_L3_x_at_rest(self):
         if config.direction == "right":
             motor1.forward(config.turn_speed)
-            time.sleep(0.15)
+            time.sleep(0.1)
 
         if config.direction == "left":
             motor1.backward(config.turn_speed)
-            time.sleep(0.15)
+            time.sleep(0.1)
 
         motor1.stop()
+
+    def on_up_arrow_press(self):
+        servo.value = 0
+
+    def on_down_arrow_press(self):
+        servo.value = -1
 
     def disconnect(self):
         motor1.stop()
         motor2.stop()
+        servo.value(0)

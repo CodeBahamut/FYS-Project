@@ -7,4 +7,4 @@ while True:
 
     if data == config.is_active:
         card_id = rfid_functions.get_id()
-        rfid_functions.scan_card_and_send_score(card_id)
+        rfid_functions.check_and_send_score(card_id)

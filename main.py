@@ -3,7 +3,7 @@ from datetime import timedelta
 import config
 import functions
 import control_management
-import multiprocessing
+import threading
 
 app = Flask(__name__)
 
@@ -17,10 +17,10 @@ def game_start(username):
 
     control_management.find_controller()
     controller = control_management.MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-    controller_process = multiprocessing.Process(target=controller.listen(), name="Listen_to_controller")
+    controller_process = threading.Thread(target=controller.listen(), name="Listen_to_controller")
     distance_check_process = \
-        multiprocessing.Process(target=control_management.check_distance(), name="Check_car_distance")
-    time_limit_reached_process = multiprocessing.Process(target=functions.countdown(config.game_time_length_sec))
+        threading.Thread(target=control_management.check_distance(), name="Check_car_distance")
+    time_limit_reached_process = threading.Thread(target=functions.countdown(config.game_time_length_sec))
 
     controller_process.start()
     time_limit_reached_process.start()
@@ -34,10 +34,12 @@ def game_start(username):
         functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_inactive)
         functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_active)
 
-
+        functions.blue_receive_msg(config.client_two_mac, config.robot_port)
 
         functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_active)
         functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_inactive)
+
+        functions.blue_receive_msg(config.client_one_mac, config.robot_port)
 
 
 @app.route("/")
@@ -62,7 +64,7 @@ def login():
 def user():
     if "user" in session:
         user = session["user"]
-        game_process = multiprocessing.Process(target=game_start(user), name="game")
+        game_process = threading.Thread(target=game_start(user), name="game")
 
         if not game_process.is_alive():
             game_process.start()
@@ -75,7 +77,8 @@ def user():
 
 @app.route("/score")
 def score():
-    return render_template("score.html")
+    data = functions.get_scores()
+    return render_template("score.html", data=data)
 
 
 @app.route("/test")

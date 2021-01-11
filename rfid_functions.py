@@ -20,7 +20,7 @@ def get_id():
     return id
 
 
-def scan_card_and_send_score(id):
+def check_and_send_score(id):
     if id == 914171570937:
         GPIO.output(12, GPIO.LOW)
         functions.blue_send_msg(config.robot_mac, config.robot_port, config.score_add_point)
