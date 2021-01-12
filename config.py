@@ -1,6 +1,9 @@
 """
 Config file
 """
+robot_ip = '192.168.137.50'
+website_ip = ''
+website_port = 6
 
 controller_mac = "DC:0C:2D:72:E6:EE"
 robot_mac = "DC:A6:32:35:1F:82"
