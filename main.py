@@ -1,181 +1,63 @@
-from flask import Flask, request, redirect, url_for, render_template
-from gpiozero import Motor
-from sh import sudo
-from pyPS4Controller.controller import Controller
-import bluetooth
-import socket
-import mysql.connector
+from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask_mysqldb import MySQL
+from celery import Celery
+from datetime import timedelta
 import config
-import time
-
-app = Flask(__name__)
-
-
-motor1 = Motor(forward=8, backward=7)
-motor2 = Motor(forward=10, backward=9)
-
-controller_mac = "DC:0C:2D:72:E6:EE"
-size = 1024
-backlog = 1
+import functions
+import control_management
+from multiprocessing import Process
 
 
-@app.route("/")
-def index():
-    return render_template('index.html')
+def game_start(username):
+    config.controls_inactive = False
+    game_score = 0
 
-@app.route('/json')
-def json():
-    return render_template('json.html')
+    control_management.find_controller()
+    controller = control_management.MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
+    controller_process = Process(target=controller.listen(), name="Listen_to_controller")
+    distance_check_process = Process(target=control_management.check_distance(), name="Check_car_distance")
+    time_limit_reached_process = Process(target=functions.countdown(config.game_time_length_sec))
 
+    controller_process.daemon = True
+    time_limit_reached_process.daemon = True
+    distance_check_process.daemon = True
 
-@app.route('/background_process_test')
-def background_process_test():
-    return "nothing"
+    controller_process.start()
+    controller_process.join()
+    time_limit_reached_process.start()
+    time_limit_reached_process.join()
+    distance_check_process.start()
+    distance_check_process.join()
+
+    while True:
+        if config.game_stop:
+            cursor = mysql.cursor()
+            sql = "INSERT INTO Fys (name, score) VALUES (%s, %s)"
+            val = (username, game_score)
+
+            cursor.execute(sql, val)
+            mysql.commit()
+
+            if controller_process.is_alive():
+                controller_process.close()
+            if time_limit_reached_process.is_alive():
+                time_limit_reached_process.close()
+            if distance_check_process.is_alive():
+                distance_check_process.close()
+            break
+
+        functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_inactive)
+        functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_active)
+
+        game_score += functions.blue_receive_msg(config.client_two_mac, config.robot_port)
+
+        functions.blue_send_msg(config.client_one_mac, config.client_one_port, config.is_active)
+        functions.blue_send_msg(config.client_two_mac, config.client_two_port, config.is_inactive)
+
+        game_score += functions.blue_receive_msg(config.client_one_mac, config.robot_port)
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
-
-
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        user = request.form["nm"]
-        return user
-    else:
-        return render_template("index.html")
-
-
-database = mysql.connector.connect(
-    host="oege.ie.hva.nl",
-    user="keladab",
-    password="ariUD31oXoqVdy",
-    database="zkeladab",
-    auth_plugin='mysql_native_password'
-)
-
-def database():
-
-# hier laat je met cursor.execute zien wat je in je database wilt zetten en welke values het heeft
-    cursor = database.cursor()
-    cursor.execute("INSERT INTO`Fys` (`name`, `score`) "
-               "VALUES( user , '5' );")
-
-    database.commit()
-
-# hiermee laat je zien wat je wilt hebben uit je database
-    cursor.execute("SELECT`name`, `score` FROM`Fys`")
-
-# hiermee pak je alles uit naam en score
-    result = cursor.fetchall()
-
-    for row in result:
-        print("Name player: " + row[0] + ", Score: " + str (row[1]))
-
-def find_controller():
-    loop = True
-    while loop:
-        result = bluetooth.lookup_name(controller_mac, timeout=20)
-        if result is None:
-            print("not detected")
-        else:
-            print("Controller found")
-            try:
-                sudo.bluetoothctl("trust", controller_mac)
-                sudo.bluetoothctl("connect", controller_mac)
-            except:
-                print("Couldn't connect to controller")
-            finally:
-                break
-
-
-class MyController(Controller):
-
-    def __init__(self, **kwargs):
-        Controller.__init__(self, **kwargs)
-
-    def on_R2_press(self, value):
-        speed_value = (32767 + value) / 65534
-        print(speed_value)
-        motor2.forward(speed_value)
-
-    def on_R2_release(self):
-        motor2.stop()
-
-    def on_L2_press(self, value):
-        speed_value = (32767 + value) / 65534
-        print("on_L2_press: {}".format(speed_value))
-        motor2.backward(speed_value)
-
-    def on_L2_release(self):
-        motor2.stop()
-
-    def on_square_press(self):
-        motor2.stop()
-
-    def on_L3_right(self, value):
-        turn_value = value / 32767
-        config.turn_speed = turn_value
-        config.direction = "right"
-        print(turn_value)
-        motor1.backward(turn_value)
-
-    def on_L3_left(self, value):
-        turn_value = 1 - ((32767 + value) / 32767)
-        config.turn_speed = turn_value
-        config.direction = "left"
-        print(turn_value)
-        motor1.forward(turn_value)
-
-    def on_L3_x_at_rest(self):
-        if config.direction == "right":
-            motor1.forward(config.turn_speed)
-            time.sleep(0.2)
-
-        if config.direction == "left":
-            motor1.backward(config.turn_speed)
-            time.sleep(0.2)
-
-        motor1.stop()
-
-    def disconnect(self):
-        motor1.stop()
-        motor2.stop()
-
-
-def rfid_send_msg(server_mac_address, port, value):
-    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.connect((server_mac_address, port))
-    s.send(bytes(value, 'UTF-8'))
-    s.close()
-
-#Port is keuze die je zelf kan maken. Wel moet de port hetzelfde zijn als bij de client script.
-def rfid_receive_msg(hostMACAddress, port):
-    s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.bind((hostMACAddress, port))
-    s.listen(backlog)
-    try:
-        client, address = s.accept()
-        while 1:
-            data = client.recv(size)
-            if data:
-                print(
-                    data)  # Whatever je gestuurd hebt word geprint in console je kan dus ook hiermee een pin aan sturen met een if etc.
-                client.send(data)
-    except:
-        print("Closing socket")
-        client.close()
-        s.close()
-
-
-def game_start():
-    NotImplemented
-
-
-find_controller()
-
-controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
-game_start()
-controller.listen()
-
-
+    functions.MySocket.connect(config.website_ip, config.robot_port)
+    username = functions.MySocket.receive_data()
+    game_process = Process(target=game_start(username))

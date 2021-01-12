@@ -1,16 +1,10 @@
-"""
-A simple Python script to send messages with bluethooth.
-"""
+import functions
+import config
+import rfid_functions
 
-import socket
+while True:
+    data = functions.blue_receive_msg(config.robot_mac, config.client_one_port)
 
-serverMACAddress = '00:1f:e1:dd:08:3d' #addres van de ontvannger pi
-port = 3
-s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-s.connect((serverMACAddress,port))
-while 1:
-    text = input() #de text of whatever je wilt versturen
-    if text == "quit":
-        break
-    s.send(bytes(text, 'UTF-8'))
-s.close()
+    if data == config.is_active:
+        card_id = rfid_functions.get_id()
+        rfid_functions.check_and_send_score(card_id)
