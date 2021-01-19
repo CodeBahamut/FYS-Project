@@ -16,7 +16,7 @@ def game_start(username):
     controller = control_management.MyController(interface="/dev/input/js0", connecting_using_ds4drv=False)
     controller_process = Process(target=controller.listen, name="Listen_to_controller")
     distance_check_process = Process(target=control_management.check_distance, name="Check_car_distance")
-    time_limit_reached_process = Process(target=functions.countdown, args=(config.game_time_length_sec))
+    time_limit_reached_process = Process(target=functions.countdown, args=config.game_time_length_sec)
 
     controller_process.daemon = True
     time_limit_reached_process.daemon = True
