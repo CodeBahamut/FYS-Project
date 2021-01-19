@@ -78,7 +78,7 @@ class MyController(Controller):
     def on_L3_x_at_rest(self):
         if config.direction == "right":
             motor1.forward(config.turn_speed)
-            time.sleep(0.1)
+            time.sleep(0.15)
 
         if config.direction == "left":
             motor1.backward(config.turn_speed)
