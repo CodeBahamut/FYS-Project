@@ -1,5 +1,7 @@
+from mysql import connector
 import time
 import socket
+import config
 
 
 '''
@@ -36,6 +38,44 @@ def blue_receive_msg(host_mac_address, port):
         print("Closing socket")
         client.close()
         s.close()
+
+
+'''
+Database related functions
+'''
+
+
+def connect_db():
+    db = config.db_config
+    try:
+        c = connector.connect(**db)
+        print("Connected!")
+        return c
+    except:
+        print("Cant connect to db")
+
+
+def save_data(name, score):
+    db = connect_db()
+    cursor = db.cursor()
+    sql = "INSERT INTO Fys (name, score) VALUES (%s, %s)"
+    val = (name, score)
+
+    cursor.execute(sql, val)
+    db.commit()
+    save_data()
+    db.close()
+
+
+def get_scores():
+    db = connect_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM `Fys`")
+
+    result = cursor.fetchall()
+    db.close()
+    return result
+
 
 
 '''

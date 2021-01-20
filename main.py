@@ -23,11 +23,8 @@ def game_start(username):
     distance_check_process.daemon = True
 
     controller_process.start()
-    controller_process.join()
     time_limit_reached_process.start()
-    time_limit_reached_process.join()
     distance_check_process.start()
-    distance_check_process.join()
 
     while True:
         if config.game_stop:
