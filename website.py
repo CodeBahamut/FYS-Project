@@ -10,7 +10,7 @@ from multiprocessing import Process
 app = Flask(__name__)
 
 app.secret_key = "TeamTechnoManTeam"
-app.permanent_session_lifetime = timedelta(seconds=5)
+app.permanent_session_lifetime = timedelta(minutes=5)
 app.config['MYSQL_HOST'] = config.db_host
 app.config['MYSQL_USER'] = config.db_user
 app.config['MYSQL_PASSWORD'] = config.db_password
