@@ -48,6 +48,7 @@ def user():
     if "user" in session:
         user = session["user"]
         game_start_process = Process(target=main.game_start, args=user)
+        game_start_process.start()
         return render_template("user.html", user=user)
     else:
         flash("Uw tijd is afgelopen!")
@@ -61,11 +62,6 @@ def score():
 
     data = cursor.fetchall()
     return render_template("score.html", data=data)
-
-
-@app.route("/test")
-def test():
-    return render_template("index.html")
 
 
 @app.route("/logout")
