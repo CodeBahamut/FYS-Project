@@ -5,6 +5,7 @@ from datetime import timedelta
 import config
 import functions
 import control_management
+import  main
 from multiprocessing import Process
 
 app = Flask(__name__)
@@ -46,7 +47,7 @@ def login():
 def user():
     if "user" in session:
         user = session["user"]
-        game_start.delay(user)
+        game_start_process = Process(target=main.game_start, args=user)
         return render_template("user.html", user=user)
     else:
         flash("Uw tijd is afgelopen!")
